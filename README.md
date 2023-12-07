@@ -1,4 +1,4 @@
 # Keycloak GGPS provider
 
-Authenticate keycloak users from the Greek GGPS (ΓΓΠΣ). This was used https://github.com/dasniko/keycloak-user-spi-demo as a skeleton for the project.
+Authenticate keycloak users from the Greek GGPS (ΓΓΠΣ). The [dasniko/keycloak-user-spi-demo](https://github.com/dasniko/keycloak-user-spi-demo) was used  as a skeleton for the project.
 
