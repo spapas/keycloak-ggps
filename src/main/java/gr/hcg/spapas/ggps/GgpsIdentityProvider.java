@@ -18,6 +18,8 @@ import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.broker.social.SocialIdentityProvider;
 import org.keycloak.events.EventBuilder;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserModel;
 
 public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider implements SocialIdentityProvider {
 
@@ -102,21 +104,34 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
 	@Override
 	protected BrokeredIdentityContext extractIdentityFromProfile(EventBuilder event, JsonNode profile) {
 
-        BrokeredIdentityContext user = new BrokeredIdentityContext(getJsonProperty(profile, "id"));
+        BrokeredIdentityContext user = new BrokeredIdentityContext(getJsonProperty(profile, "taxid"));
 
-		String username = getJsonProperty(profile, "login");
+		String username = getJsonProperty(profile, "userid");
 		user.setUsername(username);
-		user.setName(getJsonProperty(profile, "name"));
-		user.setEmail(getJsonProperty(profile, "email"));
+		user.setFirstName(getJsonProperty(profile, "firstName"));
+		user.setLastName(getJsonProperty(profile, "lastName"));
+
+        user.setUserAttribute("fatherName", getJsonProperty(profile, "fatherName"));
+        user.setUserAttribute("motherName", getJsonProperty(profile, "motherName"));
+        user.setUserAttribute("birthYear", getJsonProperty(profile, "birthYear"));
+        user.setUserAttribute("taxid", getJsonProperty(profile, "taxid"));
+        user.setUserAttribute("userid", getJsonProperty(profile, "userid"));
 		user.setIdpConfig(getConfig());
 		user.setIdp(this);
 
 		AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
 
 		return user;
-
-
 	}
+
+    @Override
+    public void updateBrokeredUser(KeycloakSession session, RealmModel realm, UserModel user, BrokeredIdentityContext context) {
+        user.setSingleAttribute("fatherName", context.getUserAttribute("fatherName"));
+        user.setSingleAttribute("motherName", context.getUserAttribute("motherName"));
+        user.setSingleAttribute("birthYear", context.getUserAttribute("birthYear"));
+        user.setSingleAttribute("taxid", context.getUserAttribute("taxid"));
+        user.setSingleAttribute("userid", context.getUserAttribute("userid"));
+    }
 
 	@Override
 	protected BrokeredIdentityContext doGetFederatedIdentity(String accessToken) {
@@ -129,9 +144,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
                         logger.warnf("Profile endpoint returned an error (%d): %s", response.getStatus(), response.asString());
                         throw new IdentityBrokerException("Profile could not be retrieved from the github endpoint");
                     }
-                    System.out.println(response);
-                    System.out.println(response.asString());
-                    //JsonNode profile = response.asJson();
+
                     JsonNode profile = GgpsXmlToJson.toJsonNode(response.asString());
                     logger.tracef("profile retrieved from github: %s", profile);
 

@@ -1,4 +1,4 @@
-# Keycloak User SPI from Django
+# Keycloak GGPS provider
 
-Authenticate keycloak users from a Django Users database. This used https://github.com/dasniko/keycloak-user-spi-demo as a skeleton for the project.
+Authenticate keycloak users from the Greek GGPS (ΓΓΠΣ). This was used https://github.com/dasniko/keycloak-user-spi-demo as a skeleton for the project.
 
