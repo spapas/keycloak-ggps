@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.core.Response;
 import java.util.Iterator;
 
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.plugins.providers.jaxb.XmlNamespacePrefixMapper;
 import org.keycloak.broker.oidc.AbstractOAuth2IdentityProvider;
 import org.keycloak.broker.oidc.OAuth2IdentityProviderConfig;
@@ -17,9 +19,9 @@ import org.keycloak.broker.provider.IdentityBrokerException;
 import org.keycloak.broker.provider.util.SimpleHttp;
 import org.keycloak.broker.social.SocialIdentityProvider;
 import org.keycloak.events.EventBuilder;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
+import org.keycloak.models.*;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.sessions.AuthenticationSessionModel;
 
 public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider implements SocialIdentityProvider {
 
@@ -36,14 +38,13 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
     public static final String TOKEN_URL = DEFAULT_TOKEN_URL;
 
     public static final String DEFAULT_API_URL = "https://test.gsis.gr/oauth2server";
+
+    public static final String DEFAULT_LOGOUT_URL = "https://test.gsis.gr/oauth2server/logout/";
     public static final String PROFILE_FRAGMENT = "/userinfo?format=xml";
     public static final String DEFAULT_PROFILE_URL = DEFAULT_API_URL + PROFILE_FRAGMENT;
     /** @deprecated Use {@link #DEFAULT_PROFILE_URL} instead. */
     @Deprecated
     public static final String PROFILE_URL = DEFAULT_PROFILE_URL;
-
-
-    public static final String DEFAULT_SCOPE = "user:email";
 
     /** Base URL key in config map. */
     protected static final String BASE_URL_KEY = "baseUrl";
@@ -55,6 +56,8 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
     private final String authUrl;
     private final String tokenUrl;
     private final String profileUrl;
+
+    private final String clientId;
     public GgpsIdentityProvider(KeycloakSession session, OAuth2IdentityProviderConfig config) {
         super(session, config);
 
@@ -64,7 +67,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
         authUrl = baseUrl + AUTH_FRAGMENT;
         tokenUrl = baseUrl + TOKEN_FRAGMENT;
         profileUrl = apiUrl + PROFILE_FRAGMENT;
-
+        clientId = config.getClientId();
 
         config.setAuthorizationUrl(authUrl);
         config.setTokenUrl(tokenUrl);
@@ -155,6 +158,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
 			throw new IdentityBrokerException("Profile could not be retrieved from the github endpoint", e);
 		}
 	}
+
     /*
 	private String searchEmail(String accessToken) {
 		try (SimpleHttp.Response response = SimpleHttp.doGet(emailUrl, session)
@@ -189,6 +193,39 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
 	@Override
 	protected String getDefaultScopes() {
         return "read";
-		//return DEFAULT_SCOPE;
 	}
+
+    @Override
+    public Response keycloakInitiatedBrowserLogout(KeycloakSession session, UserSessionModel userSession, UriInfo uriInfo, RealmModel realm) {
+        logger.info("Logging out ... client id = " + clientId);
+
+        UriBuilder logoutUri = UriBuilder.fromUri(DEFAULT_LOGOUT_URL + clientId + "?url=https://kc.hcg.gr/realms/ggps-uat/protocol/openid-connect/logout");
+//                .queryParam("client_id", );
+        logger.info("URL = " + logoutUri);
+
+        Response response = Response.status(302).location(logoutUri.build()).build();
+        return response;
+        /*
+        if (getConfig().getLogoutUrl() == null || getConfig().getLogoutUrl().trim().equals("")) return null;
+        String idToken = userSession.getNote(FEDERATED_ID_TOKEN);
+        if (idToken != null && getConfig().isBackchannelSupported()) {
+            backchannelLogout(userSession, idToken);
+            return null;
+        } else {
+            String sessionId = userSession.getId();
+            UriBuilder logoutUri = UriBuilder.fromUri(getConfig().getLogoutUrl())
+                    .queryParam("state", sessionId);
+            if (idToken != null) logoutUri.queryParam("id_token_hint", idToken);
+            String redirect = RealmsResource.brokerUrl(uriInfo)
+                    .path(IdentityBrokerService.class, "getEndpoint")
+                    .path(OIDCEndpoint.class, "logoutResponse")
+                    .build(realm.getName(), getConfig().getAlias()).toString();
+            logoutUri.queryParam("post_logout_redirect_uri", redirect);
+            Response response = Response.status(302).location(logoutUri.build()).build();
+            return response;
+        }
+
+         */
+    }
+
 }
