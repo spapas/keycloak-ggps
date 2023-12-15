@@ -22,7 +22,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
     public static final String DEFAULT_BASE_URL = "https://test.gsis.gr/oauth2server";
     public static final String AUTH_FRAGMENT = "/oauth/authorize";
     public static final String TOKEN_FRAGMENT = "/oauth/token";
-    public static final String LOGOUT_FRAGMENT = "/logout";
+    public static final String LOGOUT_FRAGMENT = "/logout/";
     public static final String PROFILE_FRAGMENT = "/userinfo?format=xml";
     protected static final String BASE_URL_KEY = "baseUrl";
 
