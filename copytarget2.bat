@@ -3,8 +3,8 @@ call c:\progr\java\apache-maven-3.6.3\bin\mvn package
 
 
 echo "COMPILE OK"
-del ..\keycloak-23.0.1\providers\gr.hcg.papas.keycloak-django-user-spi.jar
+del ..\keycloak-23.0.1\providers\gr.hcg.papas.keycloak-ggps.jar
 echo "DEL OK"
-copy /Y target\gr.hcg.papas.keycloak-django-user-spi.jar ..\keycloak-23.0.1\providers
+copy /Y target\gr.hcg.papas.keycloak-ggps.jar ..\keycloak-23.0.1\providers
 
 echo "COPY OK"

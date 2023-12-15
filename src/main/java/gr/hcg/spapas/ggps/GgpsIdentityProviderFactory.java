@@ -1,5 +1,6 @@
 
 package gr.hcg.spapas.ggps;
+import org.jboss.logging.Logger;
 import org.keycloak.broker.oidc.OAuth2IdentityProviderConfig;
 import org.keycloak.broker.provider.AbstractIdentityProviderFactory;
 import org.keycloak.models.IdentityProviderModel;
@@ -11,7 +12,7 @@ import org.keycloak.provider.ProviderConfigurationBuilder;
 import java.util.List;
 
 public class GgpsIdentityProviderFactory extends AbstractIdentityProviderFactory<GgpsIdentityProvider> implements SocialIdentityProviderFactory<GgpsIdentityProvider> {
-
+    private static final Logger logger = Logger.getLogger(GgpsIdentityProvider.class);
     public static final String PROVIDER_ID = "ggps";
 
     @Override
@@ -21,6 +22,7 @@ public class GgpsIdentityProviderFactory extends AbstractIdentityProviderFactory
 
     @Override
     public GgpsIdentityProvider create(KeycloakSession session, IdentityProviderModel model) {
+        logger.debug("\u001B[32m" +" Creating the GgpsIdentityProvider "+ "\u001B[0m");
         return new GgpsIdentityProvider(session, new OAuth2IdentityProviderConfig(model));
     }
 
@@ -38,8 +40,6 @@ public class GgpsIdentityProviderFactory extends AbstractIdentityProviderFactory
     public List<ProviderConfigProperty> getConfigProperties() {
         return ProviderConfigurationBuilder.create().property()
                 .name("baseUrl").label("Base URL").helpText("Override the default Base URL for this identity provider.")
-                .type(ProviderConfigProperty.STRING_TYPE).add().property()
-                .name("apiUrl").label("API URL").helpText("Override the default API URL for this identity provider.")
                 .type(ProviderConfigProperty.STRING_TYPE).add().build();
     }
 }
