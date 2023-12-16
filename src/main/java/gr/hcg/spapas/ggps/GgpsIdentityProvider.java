@@ -148,10 +148,11 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
 
     @Override
     public Response keycloakInitiatedBrowserLogout(KeycloakSession session, UserSessionModel userSession, UriInfo uriInfo, RealmModel realm) {
-        logger.info("Logging out ... client id = " + clientId);
-
-        UriBuilder logoutUri = UriBuilder.fromUri(logoutUrl + clientId + "?url=https://kc.hcg.gr/realms/ggps-uat/account");
-        logger.info("URL = " + logoutUri);
+        logger.info("Logging out ... client id = " + clientId +" uri info " + uriInfo.getQueryParameters());
+        String postLogoutRedirect = uriInfo.getQueryParameters().getFirst("post_logout_redirect_uri");
+        logger.info("Post logout = " + postLogoutRedirect);
+        UriBuilder logoutUri = UriBuilder.fromUri(logoutUrl + clientId).queryParam("url", postLogoutRedirect);
+        logger.info("Full logout URL = " + logoutUri.build());
         String userId = userSession.getUser().getId();
         session.sessions().getUserSession(realm, userId);
         AuthenticationManager.backchannelLogout(session, userSession, false);
