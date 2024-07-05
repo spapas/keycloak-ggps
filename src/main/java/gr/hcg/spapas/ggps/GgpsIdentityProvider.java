@@ -88,7 +88,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
 	@Override
 	protected BrokeredIdentityContext extractIdentityFromProfile(EventBuilder event, JsonNode profile) {
 
-        BrokeredIdentityContext user = new BrokeredIdentityContext(getJsonProperty(profile, "taxid"));
+        BrokeredIdentityContext user = new BrokeredIdentityContext(getJsonProperty(profile, "taxid"), getConfig());
 
 		String username = getJsonProperty(profile, "userid");
 		user.setUsername(username);
@@ -100,7 +100,7 @@ public class GgpsIdentityProvider extends AbstractOAuth2IdentityProvider impleme
         user.setUserAttribute("birthYear", getJsonProperty(profile, "birthYear"));
         user.setUserAttribute("taxid", getJsonProperty(profile, "taxid"));
         user.setUserAttribute("userid", getJsonProperty(profile, "userid"));
-		user.setIdpConfig(getConfig());
+		// user.setIdpConfig();
 		user.setIdp(this);
 
 		AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
